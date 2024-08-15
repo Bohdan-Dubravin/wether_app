@@ -1,0 +1,27 @@
+$light-theme: (
+  background-color: #ffffff,
+  text-color: #000000,
+  primary-color: #007bff,
+);
+
+$dark-theme: (
+  background-color: #121212,
+  text-color: #ffffff,
+  primary-color: #1e90ff,
+);
+
+@mixin theme($theme-map) {
+  background-color: map-get($theme-map, background-color);
+  color: map-get($theme-map, text-color);
+  border-color: map-get($theme-map, primary-color);
+}
+
+body {
+  @include theme($light-theme);
+}
+
+[data-theme="dark"] {
+  body {
+    @include theme($dark-theme);
+  }
+}
