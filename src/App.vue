@@ -8,12 +8,10 @@
 </template>
 
 <script>
-import HomeView from "./views/HomeView.vue";
 import NavBar from "./components/sections/NavBar.vue";
 
 export default {
   components: {
-    HomeView,
     NavBar,
   },
   data() {

@@ -4,12 +4,16 @@
       v-for="city in cardsData ? favorites : data"
       @click="changeChart(city)"
       @add-favorite="toggleFavorites"
+      @remove-city="$emit('remove-city', $event)"
       :key="city.city.id"
       :city="city"
       :class="{ card__active: isCardSelected(city.city.id) }"
       :isFavorite="isFavorite(city.city.id)"
       :period="period"
     />
+    <div v-if="data.length < 4" class="card-add" @click="$emit('addNewCity')">
+      <img src="/assets/images/plus.svg" />
+    </div>
     <confirm-dialogue ref="reachedMaxFavLimit" :showOkButton="false" />
   </div>
 </template>
@@ -87,6 +91,24 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.card-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  width: 100%;
+  border-radius: 3px;
+  background-color: #fff;
+  box-shadow: 1px 2px 10px rgba(0, 0, 0, 0.2);
+  -webkit-animation: open 0.5s cubic-bezier(0.39, 0, 0.38, 1);
+  border: 1px solid transparent;
+  font-size: 80px;
+  &:hover {
+    box-shadow: 1px 2px 10px rgb(50, 131, 131);
+    border: 1px solid rgba(48, 64, 124, 0.9);
+  }
+}
+
 .cards-list {
   display: grid;
   grid-template-columns: minmax(350px, 1fr) minmax(350px, 1fr) minmax(350px, 1fr);

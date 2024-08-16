@@ -20,7 +20,7 @@
 <script>
 import CardsList from "../components/wether-cards/CardsList.vue";
 export default {
-  name: "FavoritesView",
+  name: "FavoritesPage",
   components: { CardsList },
   props: {
     period: {

@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
-import FavoritesView from "../views/FavoritesView.vue";
+import HomePage from "../pages/HomePage.vue";
+import FavoritesPage from "../pages/FavoritesPage.vue";
 
 const routes = [
   {
     path: "/",
-    component: HomeView,
+    component: HomePage,
     name: "home",
     props: (route) => ({
       period: route.params.period,
@@ -14,7 +14,7 @@ const routes = [
   },
   {
     path: "/favorites",
-    component: FavoritesView,
+    component: FavoritesPage,
     name: "favorites",
     props: (route) => ({
       period: route.params.period,

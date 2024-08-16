@@ -9,14 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "chart.js": "^4.3.0",
     "axios": "^1.7.4",
+    "chart.js": "^4.3.0",
     "vue": "^3.4.35",
+    "vue-i18n": "^9.13.1",
     "vue-router": "^4.2.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.2",
-    "vite": "^5.4.0",
-    "sass": "^1.62.1"
+    "sass": "^1.62.1",
+    "vite": "^5.4.0"
   }
 }

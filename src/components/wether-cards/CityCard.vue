@@ -4,12 +4,21 @@
       <h2 class="card__title">
         {{ `${city.city.name}, ${city.city.country} ` }}
       </h2>
-      <img
-        @click.stop="addToFavorites(city)"
-        :src="`/assets/images/heart-${isFavorite ? 'filled' : 'empty'}.png`"
-        class="card__heart"
-        alt="heart icon"
-      />
+      <div>
+        <img
+          @click.stop="removeCity(city)"
+          :src="`/assets/images/close.svg`"
+          class="card__remove"
+          alt="remove
+        icon"
+        />
+        <img
+          @click.stop="addToFavorites(city)"
+          :src="`/assets/images/heart-${isFavorite ? 'filled' : 'empty'}.png`"
+          class="card__heart"
+          alt="heart icon"
+        />
+      </div>
     </div>
     <div class="card__temperature-wrapper">
       <div class="card__icon-part-wrapper">
@@ -68,6 +77,9 @@ export default {
     addToFavorites(card) {
       this.$emit("add-favorite", card);
     },
+    removeCity(city) {
+      this.$emit("remove-city", city);
+    },
   },
   computed: {
     filterListByToday() {
@@ -102,8 +114,8 @@ body {
 
   &__active,
   &:hover {
-    box-shadow: 1px 2px 10px rgb(50, 131, 131);
-    border: 1px solid rgba(48, 124, 124, 0.9);
+    box-shadow: 1px 2px 10px rgb(50, 68, 131);
+    border: 1px solid rgba(48, 81, 124, 0.9);
   }
 
   &__title-wrapper {
@@ -162,6 +174,20 @@ body {
     align-items: center;
     width: 200px;
   }
+}
+
+.card__remove {
+  opacity: 0;
+  max-width: 30px;
+  max-height: 30px;
+
+  &:hover {
+    scale: 1.1;
+  }
+}
+
+.card:hover .card__remove {
+  opacity: 1;
 }
 
 @-webkit-keyframes open {
