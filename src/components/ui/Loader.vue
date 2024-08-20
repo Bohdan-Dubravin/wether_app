@@ -6,7 +6,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "Loader",
   props: {
     visible: {
@@ -18,7 +20,7 @@ export default {
       default: false,
     },
   },
-};
+});
 </script>
 
 <style scoped>

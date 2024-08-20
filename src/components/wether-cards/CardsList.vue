@@ -1,32 +1,38 @@
 <template>
   <div class="cards-list">
     <city-card
-      v-for="city in cardsData ? favorites : data"
+      v-for="city in data"
       @click="changeChart(city)"
       @add-favorite="toggleFavorites"
-      @remove-city="$emit('remove-city', $event)"
+      @remove-city="handleRemoveCity"
       :key="city.city.id"
       :city="city"
-      :class="{ card__active: isCardSelected(city.city.id) }"
+      :class="{ card__active: isCardSelected(city.city.id) && !isFavoritesPage }"
       :isFavorite="isFavorite(city.city.id)"
       :period="period"
     />
-    <div v-if="data.length < 4" class="card-add" @click="$emit('addNewCity')">
+    <div v-if="data.length < 4 && !isFavoritesPage" class="card-add" @click="$emit('addNewCity')">
       <img src="/assets/images/plus.svg" />
     </div>
     <confirm-dialogue ref="reachedMaxFavLimit" :showOkButton="false" />
+    <confirm-dialogue ref="confirmDialogue" showOkButton />
   </div>
 </template>
 
 <script>
+import { ref, defineComponent, inject } from "vue";
 import CityCard from "./CityCard.vue";
 import ConfirmDialogue from "../ui/ConfirmDialogue.vue";
 
-export default {
+export default defineComponent({
   name: "CardsList",
   components: { CityCard, ConfirmDialogue },
   props: {
     data: {
+      type: Array,
+      default: () => [],
+    },
+    favoritesCards: {
       type: Array,
       default: () => [],
     },
@@ -38,56 +44,71 @@ export default {
       type: String,
       default: "Day",
     },
+    isFavoritesPage: {
+      type: Boolean,
+      default: false,
+    },
   },
-  data() {
-    return {
-      cities: [],
-      favorites: [],
-    };
-  },
+  setup(props, { emit, refs }) {
+    const confirmDialogue = ref(null);
+    const removeCity = inject("removeCity");
+    const favoritesCards = ref(props.favoritesCards);
 
-  methods: {
-    changeChart(city) {
-      this.$emit("chart-updated", city);
-    },
-    isCardSelected(id) {
-      if (this.cardSelected) {
-        return this.cardSelected.city.id === id;
+    const handleRemoveCity = async (city) => {
+      if (!confirmDialogue.value) return;
+      console.log(confirmDialogue.value);
+
+      const confirm = await confirmDialogue.value.show({
+        message: "Are you sure you want to remove this weather card?",
+        okButton: "Remove",
+      });
+      if (confirm) {
+        removeCity(city);
       }
-    },
-    async toggleFavorites(card) {
-      if (this.favorites.some((item) => item.city.id === card.city.id)) {
-        this.favorites = this.favorites.filter((item) => item.city.id !== card.city.id);
-        this.updateStorageFavorites();
-      } else if (this.favorites.length < 5) {
-        this.favorites.push(card);
-        this.updateStorageFavorites();
+    };
+
+    const changeChart = (city) => {
+      emit("chart-updated", city);
+    };
+
+    const isCardSelected = (id) => {
+      return props.cardSelected ? props.cardSelected.city.id === id : false;
+    };
+
+    const toggleFavorites = async (card) => {
+      if (favoritesCards.value.some((item) => item.city.id === card.city.id)) {
+        favoritesCards.value = favoritesCards.value.filter((item) => item.city.id !== card.city.id);
+        updateStorageFavorites();
+      } else if (favoritesCards.value.length < 5) {
+        favoritesCards.value.push(card);
+        updateStorageFavorites();
       } else {
-        await this.$refs.reachedMaxFavLimit.show({
+        await refs.reachedMaxFavLimit.show({
           message: "Maximum number of the favorites is 5. Remove any of them to add another one.",
           okButton: "Ok",
         });
       }
-    },
-    isFavorite(id) {
-      return this.favorites.some((card) => card.city.id === id);
-    },
-    updateStorageFavorites() {
-      localStorage.setItem("favorites", JSON.stringify(this.favorites));
-    },
+    };
+
+    const isFavorite = (id) => {
+      return favoritesCards.value.some((card) => card.city.id === id);
+    };
+
+    const updateStorageFavorites = () => {
+      localStorage.setItem("favorites", JSON.stringify(favoritesCards.value));
+    };
+
+    return {
+      changeChart,
+      isCardSelected,
+      toggleFavorites,
+      isFavorite,
+      favoritesCards,
+      confirmDialogue,
+      handleRemoveCity,
+    };
   },
-  mounted() {
-    const storedFavorites = localStorage.getItem("favorites");
-    if (storedFavorites) {
-      this.favorites = JSON.parse(storedFavorites);
-    }
-  },
-  computed: {
-    cardsData() {
-      return this.$route.name === "favorites";
-    },
-  },
-};
+});
 </script>
 
 <style scoped lang="scss">

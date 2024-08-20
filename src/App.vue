@@ -1,26 +1,22 @@
 <template>
-  <div id="app" class="app">
-    <div class="app__container">
-      <NavBar />
-      <router-view :period="period" :togglePeriod="togglePeriod"></router-view>
+  <SharedContextProvider>
+    <div id="app" class="app">
+      <div class="app__container">
+        <NavBar />
+        <router-view :key="$route.fullPath"></router-view>
+      </div>
     </div>
-  </div>
+  </SharedContextProvider>
 </template>
 
 <script>
 import NavBar from "./components/sections/NavBar.vue";
-
+import SharedContextProvider from "./context/ContextProvider.vue";
 export default {
   components: {
     NavBar,
+    SharedContextProvider,
   },
-  data() {
-    return {
-      period: "Day",
-      isDark: localStorage.getItem("theme") === "dark",
-    };
-  },
-  methods: {},
 };
 </script>
 

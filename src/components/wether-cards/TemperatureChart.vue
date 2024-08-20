@@ -1,7 +1,7 @@
 <template>
   <h2 class="chart__title">
-    Weather forecast for {{ cardSelected.city.name }},
-    {{ cardSelected.city.country }}
+    Weather forecast for {{ cardSelected?.city.name }},
+    {{ cardSelected?.city.country }}
   </h2>
   <div class="chart">
     <canvas ref="weatherChart" width="400" height="400"></canvas>
@@ -9,147 +9,84 @@
 </template>
 
 <script>
-import Chart from "chart.js/auto";
-import { fetchByCityCountry } from "../../api/weatherApi";
+import { ref, onMounted, onBeforeUnmount, defineComponent } from "vue";
+import Loader from "../ui/Loader.vue";
+import { searchCities } from "../../api/weatherApi";
 
-export default {
-  name: "TemperatureChart",
-  props: {
-    cardSelected: {
-      type: Object,
-      default: null,
-    },
-    weekData: {
-      type: Array,
-      default: () => [],
-    },
-    period: {
-      type: String,
-      default: "Day",
-    },
-  },
-  data() {
+export default defineComponent({
+  name: "SearchAutocomplete",
+  components: { Loader },
+  setup(_, { emit }) {
+    const inputValue = ref("");
+    const itemsList = ref([]);
+    const isOpen = ref(false);
+    const isLoading = ref(false);
+    const searchTimeout = ref(null);
+    const delayDuration = ref(1000);
+    const inputRef = ref(null);
+
+    const fetchCities = async (input) => {
+      if (!input.trim()) return;
+
+      try {
+        const response = await searchCities(input);
+        itemsList.value = response?.filter((item) => item.name.toLowerCase().indexOf(input.toLowerCase()) > -1);
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+      }
+    };
+
+    const handleInput = () => {
+      clearTimeout(searchTimeout.value);
+      searchTimeout.value = setTimeout(() => {
+        fetchCities(inputValue.value);
+        isOpen.value = true;
+      }, delayDuration.value);
+      isLoading.value = true;
+      isOpen.value = true;
+    };
+
+    const addCity = (result) => {
+      emit("addCity", result);
+      isOpen.value = false;
+      inputValue.value = "";
+      itemsList.value = [];
+    };
+
+    const handleClickOutside = (event) => {
+      if (!inputRef.value.contains(event.target)) {
+        isOpen.value = false;
+      }
+    };
+
+    const openSearch = () => {
+      inputValue.value = "";
+      inputRef.value.focus();
+      inputRef.value.setSelectionRange(0, 0);
+      isOpen.value = true;
+    };
+
+    onMounted(() => {
+      document.addEventListener("click", handleClickOutside);
+    });
+
+    onBeforeUnmount(() => {
+      document.removeEventListener("click", handleClickOutside);
+    });
+
     return {
-      chart: null,
-      chartData: [],
+      inputValue,
+      itemsList,
+      isOpen,
+      isLoading,
+      delayDuration,
+      inputRef,
+      handleInput,
+      addCity,
+      openSearch,
     };
   },
-  mounted() {
-    if (this.chart) {
-      this.chart.destroy();
-    }
-    if (this.period === "Day") {
-      this.fetchDayDataAndCreateChart();
-    } else {
-      this.createWeekChart();
-    }
-  },
-  beforeUnmount() {
-    if (this.chart) {
-      this.chart.destroy();
-    }
-  },
-  watch: {
-    cardSelected: {
-      handler: "handleWatchedVariables",
-      immediate: true,
-    },
-    period: {
-      handler: "handleWatchedVariables",
-      immediate: true,
-    },
-  },
-  methods: {
-    async fetchDayDataAndCreateChart() {
-      if (this.cardSelected) {
-        await this.fetchChartData(this.cardSelected);
-        this.createDayChart();
-      }
-    },
-    async createDayChart() {
-      if (this.$refs.weatherChart) {
-        const ctx = this.$refs.weatherChart.getContext("2d");
-        const labels = this.filterDayData.map((entry) => entry.dt_txt);
-        const temperatures = this.filterDayData.map((entry) => entry.main.temp);
-        this.chart = new Chart(ctx, this.chartConfig(labels, temperatures));
-      }
-    },
-    async createWeekChart() {
-      const data = await this.weekData.filter((card) => card.city.id === this.cardSelected.city.id);
-      const ctx = this.$refs.weatherChart?.getContext("2d");
-      const labels = data[0].list.map((entry) => entry.date);
-      const temperatures = data[0].list.map((entry) => entry.averageTemperature);
-      this.chart = new Chart(ctx, this.chartConfig(labels, temperatures));
-    },
-    destroyChart() {
-      if (this.chart != null) {
-        this.chart.destroy();
-      }
-    },
-
-    async fetchChartData(city) {
-      if (city) {
-        const cityName = city.city.name;
-        const countryCode = city.city.country;
-        const data = await fetchByCityCountry(cityName, countryCode);
-        this.chartData = data.list;
-      }
-    },
-    chartConfig(labels, temperatures) {
-      return {
-        type: "bar",
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: "degrees Celcius",
-              data: temperatures,
-              backgroundColor: ["rgba(75, 192, 192, 0.2)"],
-              borderColor: ["rgba(75, 192, 192, 1)"],
-              borderWidth: 1,
-              barThickness: 40,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          maxHeight: 700,
-          scales: {
-            y: {
-              beginAtZero: true,
-            },
-          },
-        },
-      };
-    },
-    async handleWatchedVariables() {
-      try {
-        if (this.chart) {
-          await this.chart.destroy();
-          if (this.$refs.weatherChart) {
-            this.period === "Day" ? this.fetchDayDataAndCreateChart() : this.createWeekChart();
-          }
-        }
-      } catch (error) {
-        console.log("An error occurred:", error);
-      }
-    },
-  },
-  beforeRouteLeave(to, from, next) {
-    if (this.chart) {
-      this.chart.destroy;
-      next();
-    }
-  },
-  computed: {
-    filterDayData() {
-      const currentDate = new Date().toISOString().slice(0, 10);
-      const filteredData = this.chartData.filter((entry) => entry.dt_txt.includes(currentDate));
-      return filteredData;
-    },
-  },
-};
+});
 </script>
 
 <style scoped lang="scss">

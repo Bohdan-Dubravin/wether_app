@@ -57,7 +57,8 @@
 </template>
 
 <script>
-export default {
+import { computed, defineComponent } from "vue";
+export default defineComponent({
   name: "CityCard",
   props: {
     city: {
@@ -73,22 +74,26 @@ export default {
       default: "Day",
     },
   },
-  methods: {
-    addToFavorites(card) {
-      this.$emit("add-favorite", card);
-    },
-    removeCity(city) {
-      this.$emit("remove-city", city);
-    },
-  },
-  computed: {
-    filterListByToday() {
+  setup(props, { emit }) {
+    const addToFavorites = (card) => {
+      emit("add-favorite", card);
+    };
+    const removeCity = (city) => {
+      emit("remove-city", city);
+    };
+
+    const filterListByToday = computed(() => {
       const currentDate = new Date().toISOString().slice(0, 10);
-      const filterListByToday = this.city.list.filter((obj) => obj.dt_txt.includes(currentDate));
-      return filterListByToday;
-    },
+      return props.city.list.filter((obj) => obj.dt_txt.includes(currentDate));
+    });
+
+    return {
+      addToFavorites,
+      filterListByToday,
+      removeCity,
+    };
   },
-};
+});
 </script>
 
 <style scoped lang="scss">

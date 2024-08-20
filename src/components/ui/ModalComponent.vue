@@ -9,21 +9,28 @@
 </template>
 
 <script>
-export default {
-  name: "ModalComponent",
-  data: () => ({
-    isVisible: false,
-  }),
-  methods: {
-    open() {
-      this.isVisible = true;
-    },
+import { ref, defineComponent } from "vue";
 
-    close() {
-      this.isVisible = false;
-    },
+export default defineComponent({
+  name: "ModalComponent",
+  setup() {
+    const isVisible = ref(false);
+
+    const open = () => {
+      isVisible.value = true;
+    };
+
+    const close = () => {
+      isVisible.value = false;
+    };
+
+    return {
+      isVisible,
+      open,
+      close,
+    };
   },
-};
+});
 </script>
 
 <style scoped scss>

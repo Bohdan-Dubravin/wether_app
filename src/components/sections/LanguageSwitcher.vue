@@ -18,7 +18,9 @@
 </template>
 
 <script>
-export default {
+import { ref, computed, defineComponent } from "vue";
+
+export default defineComponent({
   name: "LanguageSwitcher",
   data() {
     return {
@@ -46,7 +48,7 @@ export default {
       this.isOpen = false;
     },
   },
-};
+});
 </script>
 
 <style scoped>

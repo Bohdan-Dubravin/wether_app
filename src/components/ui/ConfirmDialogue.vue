@@ -1,12 +1,12 @@
 <template>
-  <modal-component ref="popup">
+  <modal-component ref="popupRef">
     <h2 style="margin-top: 0">{{ title }}</h2>
     <p class="dialogue__message">{{ message }}</p>
     <div class="btns">
-      <button class="button cancel-btn" @click="_cancel">
+      <button class="button cancel-btn" @click="cancel">
         {{ cancelButton }}
       </button>
-      <button v-if="showOkButton" class="button ok-btn" @click="_confirm">
+      <button v-if="showOkButton" class="button ok-btn" @click="confirm">
         {{ okButton }}
       </button>
     </div>
@@ -14,11 +14,11 @@
 </template>
 
 <script>
+import { ref } from "vue";
 import ModalComponent from "./ModalComponent.vue";
 
 export default {
   name: "ConfirmDialogue",
-
   components: { ModalComponent },
   props: {
     showOkButton: {
@@ -26,40 +26,49 @@ export default {
       default: true,
     },
   },
+  setup(props) {
+    const title = ref(undefined);
+    const message = ref(undefined);
+    const okButton = ref(undefined);
+    const cancelButton = ref("Go Back");
+    let resolvePromise = null;
+    let rejectPromise = null;
+    const popupRef = ref(null);
 
-  data: () => ({
-    title: undefined,
-    message: undefined,
-    okButton: undefined,
-    cancelButton: "Go Back",
-    resolvePromise: undefined,
-    rejectPromise: undefined,
-  }),
-
-  methods: {
-    show(opts = {}) {
-      this.title = opts.title;
-      this.message = opts.message;
-      this.okButton = opts.okButton;
+    const show = (opts = {}) => {
+      title.value = opts.title;
+      message.value = opts.message;
+      okButton.value = opts.okButton;
       if (opts.cancelButton) {
-        this.cancelButton = opts.cancelButton;
+        cancelButton.value = opts.cancelButton;
       }
-      this.$refs.popup.open();
+      popupRef.value.open();
       return new Promise((resolve, reject) => {
-        this.resolvePromise = resolve;
-        this.rejectPromise = reject;
+        resolvePromise = resolve;
+        rejectPromise = reject;
       });
-    },
+    };
 
-    _confirm() {
-      this.$refs.popup.close();
-      this.resolvePromise(true);
-    },
+    const confirm = () => {
+      popupRef.value.close();
+      if (resolvePromise) resolvePromise(true);
+    };
 
-    _cancel() {
-      this.$refs.popup.close();
-      this.resolvePromise(false);
-    },
+    const cancel = () => {
+      popupRef.value.close();
+      if (resolvePromise) resolvePromise(false);
+    };
+
+    return {
+      title,
+      message,
+      okButton,
+      cancelButton,
+      popupRef,
+      show,
+      confirm,
+      cancel,
+    };
   },
 };
 </script>

@@ -1,24 +1,20 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomePage from "../pages/HomePage.vue";
-import FavoritesPage from "../pages/FavoritesPage.vue";
+import Page from "../pages/Page.vue";
 
 const routes = [
   {
     path: "/",
-    component: HomePage,
+    component: Page,
     name: "home",
-    props: (route) => ({
-      period: route.params.period,
-      togglePeriod: route.params.togglePeriod,
-    }),
+    key: "home",
   },
   {
     path: "/favorites",
-    component: FavoritesPage,
+    component: Page,
     name: "favorites",
-    props: (route) => ({
-      period: route.params.period,
-      togglePeriod: route.params.togglePeriod,
+    key: "favorites",
+    props: () => ({
+      favoritesPage: true,
     }),
   },
 ];

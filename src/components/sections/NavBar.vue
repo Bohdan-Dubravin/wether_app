@@ -5,7 +5,7 @@
       <router-link class="nav__link" to="/favorites">{{ $t("favorites") }}</router-link>
     </div>
     <div class="nav__tools">
-      <LanguageSwitcher />
+      <!-- <LanguageSwitcher /> -->
       <button @click="toggleTheme" class="nav__themeSwitch">
         <img
           class="nav__themeSwitch"
@@ -18,29 +18,31 @@
 </template>
 
 <script>
+import { ref, onMounted, defineComponent } from "vue";
 import LanguageSwitcher from "./LanguageSwitcher.vue";
 
-export default {
+export default defineComponent({
   components: { LanguageSwitcher },
-  data() {
-    return {
-      period: "Day",
-      isDark: localStorage.getItem("theme") === "dark",
-    };
-  },
-  methods: {
-    toggleTheme() {
-      this.isDark = !this.isDark;
-      const theme = this.isDark ? "dark" : "light";
+  setup() {
+    const isDark = ref(false);
+
+    const toggleTheme = () => {
+      isDark.value = !isDark.value;
+      const theme = isDark.value ? "dark" : "light";
       document.documentElement.setAttribute("data-theme", theme);
       localStorage.setItem("theme", theme);
-    },
-    changeLanguage(lang) {
-      this.$i18n.locale = lang;
-      localStorage.setItem("language", lang);
-    },
+    };
+
+    onMounted(() => {
+      isDark.value = localStorage.getItem("theme") === "dark";
+    });
+
+    return {
+      isDark,
+      toggleTheme,
+    };
   },
-};
+});
 </script>
 
 <style scoped lang="scss">

@@ -1,7 +1,7 @@
 <template>
   <div class="autocomplete">
     <h1 class="autocomplete-label">Type city name to search</h1>
-    <input type="text" class="autocomplete__input" v-model="inputValue" @input="handleInput" ref="input" />
+    <input type="text" class="autocomplete__input" v-model="inputValue" @input="handleInput" ref="inputRef" />
 
     <ul class="autocomplete-results" v-show="isOpen">
       <div v-if="isLoading">
@@ -9,7 +9,6 @@
       </div>
       <div><p v-if="!itemsList?.length && !isLoading">No results</p></div>
       <li v-for="(item, i) in itemsList" :key="i" class="autocomplete-result" @click="addCity(item)">
-        <!-- :class="{ 'is-active': i === arrowCounter }" -->
         {{ item.name }}, {{ item.sys.country }}
       </li>
     </ul>
@@ -17,69 +16,85 @@
 </template>
 
 <script>
+import { ref, onMounted, onUnmounted, watch, inject } from "vue";
 import Loader from "../ui/Loader.vue";
 import { searchCities } from "../../api/weatherApi";
+
 export default {
   name: "SearchAutocomplete",
   components: { Loader },
-  data() {
-    return {
-      inputValue: "",
-      itemsList: [],
-      isOpen: false,
-      isLoading: false,
-      searchTimeout: null,
-      delayDuration: 1000,
-    };
-  },
-  mounted() {
-    document.addEventListener("click", this.handleClickOutside);
-  },
-  destroyed() {
-    document.removeEventListener("click", this.handleClickOutside);
-  },
+  setup() {
+    const addNewCity = inject("addNewCity");
+    const inputValue = ref("");
+    const itemsList = ref([]);
+    const isOpen = ref(false);
+    const isLoading = ref(false);
+    const searchTimeout = ref(null);
+    const delayDuration = 1000;
+    const inputRef = ref(null);
 
-  methods: {
-    async fetchCities(inputValue) {
-      if (!inputValue.trim()) return;
+    const fetchCities = async (value) => {
+      if (!value.trim()) return;
 
       try {
-        const response = await searchCities(inputValue);
-        this.itemsList = response?.filter(
-          (item) => item.name.toLowerCase().indexOf(this.inputValue.toLowerCase()) > -1
-        );
+        const response = await searchCities(value);
+        itemsList.value = response?.filter((item) => item.name.toLowerCase().includes(inputValue.value.toLowerCase()));
       } catch (error) {
-        console.error("Error fetching countries:", error);
+        console.error("Error fetching cities:", error);
+      } finally {
+        isLoading.value = false;
       }
-    },
-    handleInput() {
-      clearTimeout(this.searchTimeout);
-      this.searchTimeout = setTimeout(() => {
-        this.fetchCities(this.inputValue);
-        this.isOpen = true;
-      }, this.delayDuration);
-      this.isLoading = true;
-      this.isOpen = true;
-    },
-    addCity(result) {
-      this.$emit("addCity", result);
-      this.isOpen = false;
-      this.inputValue = "";
-      this.itemsList = [];
-    },
-    handleClickOutside(event) {
-      if (!this.$el.contains(event.target)) {
-        this.isOpen = false;
-      }
-    },
+    };
 
-    openSearch() {
-      const input = this.$refs.input;
-      this.inputValue = "";
-      input.focus();
-      input.setSelectionRange(0, 0);
-      this.isOpen = true;
-    },
+    const handleInput = () => {
+      clearTimeout(searchTimeout.value);
+      searchTimeout.value = setTimeout(() => {
+        fetchCities(inputValue.value);
+        isOpen.value = true;
+      }, delayDuration);
+      isLoading.value = true;
+    };
+
+    const addCity = async (result) => {
+      await addNewCity(result);
+      isOpen.value = false;
+      inputValue.value = "";
+      itemsList.value = [];
+    };
+
+    const handleClickOutside = (event) => {
+      if (inputRef.value && !inputRef.value.contains(event.target)) {
+        isOpen.value = false;
+      }
+    };
+
+    const openSearch = () => {
+      if (inputRef.value) {
+        inputValue.value = "";
+        inputRef.value.focus();
+        inputRef.value.setSelectionRange(0, 0);
+        isOpen.value = true;
+      }
+    };
+
+    onMounted(() => {
+      document.addEventListener("click", handleClickOutside);
+    });
+
+    onUnmounted(() => {
+      document.removeEventListener("click", handleClickOutside);
+    });
+
+    return {
+      inputValue,
+      itemsList,
+      isOpen,
+      isLoading,
+      handleInput,
+      addCity,
+      openSearch,
+      inputRef,
+    };
   },
 };
 </script>
