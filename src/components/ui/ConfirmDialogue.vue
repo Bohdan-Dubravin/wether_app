@@ -6,8 +6,8 @@
       <button class="button cancel-btn" @click="cancel">
         {{ cancelButton }}
       </button>
-      <button v-if="showOkButton" class="button ok-btn" @click="confirm">
-        {{ okButton }}
+      <button v-if="showsubmitButtonText" class="button ok-btn" @click="confirm">
+        {{ submitButtonText }}
       </button>
     </div>
   </modal-component>
@@ -21,7 +21,7 @@ export default {
   name: "ConfirmDialogue",
   components: { ModalComponent },
   props: {
-    showOkButton: {
+    showsubmitButtonText: {
       type: Boolean,
       default: true,
     },
@@ -29,7 +29,7 @@ export default {
   setup(props) {
     const title = ref(undefined);
     const message = ref(undefined);
-    const okButton = ref(undefined);
+    const submitButtonText = ref(undefined);
     const cancelButton = ref("Go Back");
     let resolvePromise = null;
     let rejectPromise = null;
@@ -38,7 +38,7 @@ export default {
     const show = (opts = {}) => {
       title.value = opts.title;
       message.value = opts.message;
-      okButton.value = opts.okButton;
+      submitButtonText.value = opts.submitButtonText;
       if (opts.cancelButton) {
         cancelButton.value = opts.cancelButton;
       }
@@ -62,7 +62,7 @@ export default {
     return {
       title,
       message,
-      okButton,
+      submitButtonText,
       cancelButton,
       popupRef,
       show,

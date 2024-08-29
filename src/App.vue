@@ -22,7 +22,7 @@ export default {
   },
   setup() {
     const alertStore = useHandleErrorStore();
-    const showAlert = computed(() => alertStore.showAlert);
+    const showAlert = computed(() => alertStore.isAlertVisible);
     const alertText = computed(() => alertStore.alertText);
     return { showAlert, alertText };
   },

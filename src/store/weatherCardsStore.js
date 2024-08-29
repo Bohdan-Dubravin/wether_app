@@ -2,10 +2,12 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import { fetchByCityCountry, fetchGeolocationData } from "../api/weatherApi";
 import calculateAverageTemperature from "../utils/calculateAverageTemperature";
+import useHandleErrorStore from "./errorHandleStore";
 
 const useWeatherCardsStore = defineStore("weatherCards", () => {
   const favoriteCities = ref(JSON.parse(localStorage.getItem("favorites")) || []);
   const selectedCities = ref([]);
+  const showAlertStore = useHandleErrorStore();
 
   const updateStorageFavoriteCities = () => {
     localStorage.setItem("favorites", JSON.stringify(favoriteCities.value));
@@ -17,15 +19,9 @@ const useWeatherCardsStore = defineStore("weatherCards", () => {
 
   const addNewCity = async (result) => {
     if (selectedCities.value.some((item) => item.city.id === result.id)) {
-      return {
-        message: "The weather card already exists.",
-        show: true,
-      };
+      showAlertStore.showAlert("The weather card already exists.");
     } else if (selectedCities.value.length >= 5) {
-      return {
-        message: "Maximum number of the cards is 5. Remove any of them to add another one.",
-        show: true,
-      };
+      showAlertStore.showAlert("Maximum number of the cards is 5. Remove any of them to add another one.");
     } else {
       await handleCitySelect(result);
     }

@@ -2,23 +2,29 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 const useHandleErrorStore = defineStore("errorHandle", () => {
-  const showAlert = ref(false);
+  const isAlertVisible = ref(false);
   const alertText = ref([]);
 
-  const toggleShowAlert = (value, text) => {
-    if (value) {
-      alertText.value = text;
-      showAlert.value = true;
-    } else {
-      showAlert.value = false;
-      alertText.value = "";
+  let alertTimeout = null;
+
+  const showAlert = (text) => {
+    alertText.value = text;
+    isAlertVisible.value = true;
+
+    if (alertTimeout) {
+      clearTimeout(alertTimeout);
     }
+
+    alertTimeout = setTimeout(() => {
+      isAlertVisible.value = false;
+      alertText.value = "";
+    }, 5000);
   };
 
   return {
     showAlert,
     alertText,
-    toggleShowAlert,
+    isAlertVisible,
   };
 });
 

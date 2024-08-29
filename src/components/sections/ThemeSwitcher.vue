@@ -35,7 +35,6 @@ export default defineComponent({
 <style scoped>
 .theme-switch {
   max-width: 40px;
-
   background: none !important;
   outline: none;
   border: none;

@@ -32,8 +32,8 @@
     :weekData="selectedCities"
   /> -->
 
-  <confirm-dialogue ref="confirmDialogue" :showOkButton="true" />
-  <confirm-dialogue ref="reachedMaxLimit" :showOkButton="false" />
+  <confirm-dialogue ref="confirmDialogue" :showsubmitButtonText="true" />
+  <confirm-dialogue ref="reachedMaxLimit" :showsubmitButtonText="false" />
 </template>
 
 <script>
@@ -65,11 +65,8 @@ export default defineComponent({
     const weatherStore = useWeatherCardsStore();
     const { favoriteCities, selectedCities } = storeToRefs(weatherStore);
     const autocompleteRef = ref(null);
-    const weatherData = ref(null);
-    const selectedValue = ref("");
+
     const period = ref("Day");
-    const cardsData = ref([]);
-    const averagedDataWeek = ref([]);
     const cardSelected = ref(null);
     const periodLinks = ["Day", "Week"];
     const selectedCitiesLength = computed(() => selectedCities.value.length);
@@ -96,15 +93,6 @@ export default defineComponent({
       ipInfo.city = data.city;
       ipInfo.countryCode = data.country_code2;
       weatherStore.addNewCity({ name: data.city, sys: { county: data.country_code2 } });
-      // const cityWeatherByIp = await fetchByCityCountry(ipInfo.city, ipInfo.countryCode);
-      // cardsData.value.push(formattedCard(cityWeatherByIp));
-      // updateStorageDefaultList();
-
-      // cardSelected.value = cardsData.value[0];
-    };
-
-    const formattedCard = (card) => {
-      return { ...card, list: calculateAverageTemperature(card.list) };
     };
 
     watch(selectedCitiesLength, (newLength) => {
@@ -114,8 +102,6 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      // console.log(selectedCities.length);
-
       if (!selectedCities.value.length) {
         getIpInfo();
       }
@@ -123,12 +109,8 @@ export default defineComponent({
 
     return {
       selectedCities,
-      weatherData,
-      selectedValue,
       period,
-      cardsData,
       favoriteCities,
-      averagedDataWeek,
       cardSelected,
       periodLinks,
       ipInfo,
@@ -136,9 +118,6 @@ export default defineComponent({
       handleAddNewCity,
       autocompleteRef,
       handleChartUpdate,
-
-      getIpInfo,
-      formattedCard,
     };
   },
 });

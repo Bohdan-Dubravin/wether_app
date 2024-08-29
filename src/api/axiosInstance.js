@@ -12,11 +12,8 @@ $axios.interceptors.response.use(
   async (error) => {
     const store = useHandleErrorStore();
 
-    store.toggleShowAlert(true, error?.message);
+    store.showAlert(error?.message);
 
-    setTimeout(() => {
-      store.toggleShowAlert(false);
-    }, 5000);
     console.log(error);
   }
 );

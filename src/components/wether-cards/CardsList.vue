@@ -26,8 +26,7 @@
     >
       <img src="/assets/images/plus.svg" />
     </div>
-    <confirm-dialogue ref="reachedMaxFavLimit" :showOkButton="false" />
-    <confirm-dialogue ref="confirmDialogue" showOkButton />
+    <confirm-dialogue ref="confirmDialogue" showsubmitButtonText />
   </div>
 </template>
 
@@ -37,6 +36,7 @@ import Loader from "../ui/Loader.vue";
 import CityCard from "./CityCard.vue";
 import ConfirmDialogue from "../ui/ConfirmDialogue.vue";
 import useWeatherCardsStore from "../../store/weatherCardsStore";
+import useHandleErrorStore from "../../store/errorHandleStore";
 import { storeToRefs } from "pinia";
 
 export default defineComponent({
@@ -62,16 +62,16 @@ export default defineComponent({
   },
   setup(props, { emit, refs }) {
     const confirmDialogue = ref(null);
+    const showAlertStore = useHandleErrorStore();
     const weatherStore = useWeatherCardsStore();
-    const { favoriteCities, selectedCities } = storeToRefs(weatherStore);
+    const { favoriteCities } = storeToRefs(weatherStore);
 
     const handleRemoveCity = async (city) => {
       if (!confirmDialogue.value) return;
-      console.log(confirmDialogue.value);
 
       const confirm = await confirmDialogue.value.show({
         message: "Are you sure you want to remove this weather card?",
-        okButton: "Remove",
+        submitButtonText: "Remove",
       });
       if (confirm) {
         weatherStore.removeCity(city);
@@ -90,10 +90,7 @@ export default defineComponent({
       if (favoriteCities.value.some((item) => item.city.id === card.city.id) || favoriteCities.value.length < 5) {
         weatherStore.toggleFavoriteCities(card);
       } else {
-        await refs.reachedMaxFavLimit.show({
-          message: "Maximum number of the favorites is 5. Remove any of them to add another one.",
-          okButton: "Ok",
-        });
+        showAlertStore.showAlert("Maximum number of the favorites is 5. Remove any of them to add another one.");
       }
     };
 
