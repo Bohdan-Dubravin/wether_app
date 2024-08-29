@@ -14,6 +14,9 @@
     <div v-if="data.length < 4 && !isFavoritesPage" class="card-add" @click="$emit('addNewCity')">
       <img src="/assets/images/plus.svg" />
     </div>
+    <div v-if="!data.length && !isFavoritesPage" class="card-add">
+      <Loader :visible="isLoading" />
+    </div>
     <confirm-dialogue ref="reachedMaxFavLimit" :showOkButton="false" />
     <confirm-dialogue ref="confirmDialogue" showOkButton />
   </div>
@@ -23,16 +26,14 @@
 import { ref, defineComponent, inject } from "vue";
 import CityCard from "./CityCard.vue";
 import ConfirmDialogue from "../ui/ConfirmDialogue.vue";
+import useWeatherCardsStore from "../../store/weatherCardsStore";
+import { storeToRefs } from "pinia";
 
 export default defineComponent({
   name: "CardsList",
   components: { CityCard, ConfirmDialogue },
   props: {
     data: {
-      type: Array,
-      default: () => [],
-    },
-    favoritesCards: {
       type: Array,
       default: () => [],
     },
@@ -51,8 +52,8 @@ export default defineComponent({
   },
   setup(props, { emit, refs }) {
     const confirmDialogue = ref(null);
-    const removeCity = inject("removeCity");
-    const favoritesCards = ref(props.favoritesCards);
+    const weatherStore = useWeatherCardsStore();
+    const { favoriteCities, selectedCities } = storeToRefs(weatherStore);
 
     const handleRemoveCity = async (city) => {
       if (!confirmDialogue.value) return;
@@ -63,7 +64,7 @@ export default defineComponent({
         okButton: "Remove",
       });
       if (confirm) {
-        removeCity(city);
+        weatherStore.removeCity(city);
       }
     };
 
@@ -76,12 +77,8 @@ export default defineComponent({
     };
 
     const toggleFavorites = async (card) => {
-      if (favoritesCards.value.some((item) => item.city.id === card.city.id)) {
-        favoritesCards.value = favoritesCards.value.filter((item) => item.city.id !== card.city.id);
-        updateStorageFavorites();
-      } else if (favoritesCards.value.length < 5) {
-        favoritesCards.value.push(card);
-        updateStorageFavorites();
+      if (favoriteCities.value.some((item) => item.city.id === card.city.id) || favoriteCities.value.length < 5) {
+        weatherStore.toggleFavoriteCities(card);
       } else {
         await refs.reachedMaxFavLimit.show({
           message: "Maximum number of the favorites is 5. Remove any of them to add another one.",
@@ -91,11 +88,7 @@ export default defineComponent({
     };
 
     const isFavorite = (id) => {
-      return favoritesCards.value.some((card) => card.city.id === id);
-    };
-
-    const updateStorageFavorites = () => {
-      localStorage.setItem("favorites", JSON.stringify(favoritesCards.value));
+      return favoriteCities.value.some((card) => card.city.id === id);
     };
 
     return {
@@ -103,7 +96,6 @@ export default defineComponent({
       isCardSelected,
       toggleFavorites,
       isFavorite,
-      favoritesCards,
       confirmDialogue,
       handleRemoveCity,
     };

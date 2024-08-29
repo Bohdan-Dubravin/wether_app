@@ -16,11 +16,10 @@
       </p>
     </div>
     <cards-list
-      :data="selectedCities"
+      :data="!favoritesPage ? selectedCities : favoriteCities"
       :isFavoritesPage="favoritesPage"
       :cardSelected="cardSelected"
       :period="period"
-      :favoritesCards="favoritesCards"
       @chart-updated="handleChartUpdate"
       @addNewCity="handleAddNewCity"
     />
@@ -38,13 +37,15 @@
 </template>
 
 <script>
-import { ref, reactive, computed, defineComponent, onMounted, inject } from "vue";
+import { ref, reactive, defineComponent, watch, computed, onMounted } from "vue";
 import { fetchCurrentWeather, fetchByCityCountry, fetchGeolocationData } from "../api/weatherApi";
 import SearchAutocomplete from "../components/ui/SearchAutocomplete.vue";
 import TemperatureChart from "../components/wether-cards/TemperatureChart.vue";
 import CardsList from "../components/wether-cards/CardsList.vue";
 import ConfirmDialogue from "../components/ui/ConfirmDialogue.vue";
 import calculateAverageTemperature from "../utils/calculateAverageTemperature";
+import useWeatherCardsStore from "../store/weatherCardsStore";
+import { storeToRefs } from "pinia";
 
 export default defineComponent({
   name: "Page",
@@ -60,17 +61,18 @@ export default defineComponent({
       default: false,
     },
   },
-  setup(props) {
-    const selectedCities = inject("selectedCities");
+  setup() {
+    const weatherStore = useWeatherCardsStore();
+    const { favoriteCities, selectedCities } = storeToRefs(weatherStore);
     const autocompleteRef = ref(null);
     const weatherData = ref(null);
     const selectedValue = ref("");
     const period = ref("Day");
     const cardsData = ref([]);
-    const favoritesCards = ref([]);
     const averagedDataWeek = ref([]);
     const cardSelected = ref(null);
     const periodLinks = ["Day", "Week"];
+    const selectedCitiesLength = computed(() => selectedCities.value.length);
     const ipInfo = reactive({
       city: "",
       countryCode: "",
@@ -89,60 +91,33 @@ export default defineComponent({
     const handleChartUpdate = (city) => {
       cardSelected.value = city;
     };
-
-    const toggleFavorites = async (card) => {
-      if (favoritesCards.value.some((item) => item.city.id === card.city.id)) {
-        favoritesCards.value = favoritesCards.value.filter((item) => item.city.id !== card.city.id);
-        updateStorageFavorites();
-      } else if (favoritesCards.value.length < 5) {
-        favoritesCards.value.push(card);
-        updateStorageFavorites();
-      } else {
-        await refs.reachedMaxFavLimit.show({
-          message: "Maximum number of the favorites is 5. Remove any of them to add another one.",
-          okButton: "Ok",
-        });
-      }
-    };
-
-    const updateStorageDefaultList = () => {
-      localStorage.setItem("defaultList", JSON.stringify(cardsData.value));
-    };
-
     const getIpInfo = async () => {
       const data = await fetchGeolocationData();
       ipInfo.city = data.city;
       ipInfo.countryCode = data.country_code2;
-      const cityWeatherByIp = await fetchByCityCountry(ipInfo.city, ipInfo.countryCode);
-      cardsData.value.push(formattedCard(cityWeatherByIp));
-      updateStorageDefaultList();
+      weatherStore.addNewCity({ name: data.city, sys: { county: data.country_code2 } });
+      // const cityWeatherByIp = await fetchByCityCountry(ipInfo.city, ipInfo.countryCode);
+      // cardsData.value.push(formattedCard(cityWeatherByIp));
+      // updateStorageDefaultList();
 
-      cardSelected.value = cardsData.value[0];
+      // cardSelected.value = cardsData.value[0];
     };
 
     const formattedCard = (card) => {
       return { ...card, list: calculateAverageTemperature(card.list) };
     };
 
+    watch(selectedCitiesLength, (newLength) => {
+      if (!newLength) {
+        getIpInfo();
+      }
+    });
+
     onMounted(() => {
-      const storedFavorites = localStorage.getItem("favorites");
-      favoritesCards.value = JSON.parse(storedFavorites) || [];
-      if (!props.favoritesPage) {
-        const storedDefaultList = localStorage.getItem("defaultList");
-        let defaultList;
-        if (storedDefaultList) {
-          defaultList = JSON.parse(storedDefaultList);
-          if (defaultList.length) {
-            cardsData.value = defaultList;
-            cardSelected.value = cardsData.value[0];
-          } else {
-            getIpInfo();
-          }
-        } else {
-          getIpInfo();
-        }
-      } else {
-        cardsData.value = JSON.parse(storedFavorites) || [];
+      // console.log(selectedCities.length);
+
+      if (!selectedCities.value.length) {
+        getIpInfo();
       }
     });
 
@@ -152,7 +127,7 @@ export default defineComponent({
       selectedValue,
       period,
       cardsData,
-      favoritesCards,
+      favoriteCities,
       averagedDataWeek,
       cardSelected,
       periodLinks,
@@ -161,8 +136,7 @@ export default defineComponent({
       handleAddNewCity,
       autocompleteRef,
       handleChartUpdate,
-      toggleFavorites,
-      updateStorageDefaultList,
+
       getIpInfo,
       formattedCard,
     };

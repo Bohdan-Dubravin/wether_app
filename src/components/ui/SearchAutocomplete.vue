@@ -3,28 +3,34 @@
     <h1 class="autocomplete-label">Type city name to search</h1>
     <input type="text" class="autocomplete__input" v-model="inputValue" @input="handleInput" ref="inputRef" />
 
-    <ul class="autocomplete-results" v-show="isOpen">
+    <ul
+      :class="{ 'loading-autocomplete': isLoading || !itemsList?.length }"
+      class="autocomplete-results"
+      v-show="isOpen"
+    >
       <div v-if="isLoading">
         <Loader :visible="isLoading" />
       </div>
-      <div><p v-if="!itemsList?.length && !isLoading">No results</p></div>
-      <li v-for="(item, i) in itemsList" :key="i" class="autocomplete-result" @click="addCity(item)">
-        {{ item.name }}, {{ item.sys.country }}
+      <p v-else-if="!itemsList?.length && !isLoading">No results</p>
+      <li v-else v-for="(item, i) in itemsList" :key="i" class="autocomplete-result" @click="addCity(item)">
+        {{ item.name }} / {{ item.sys.country }}
       </li>
     </ul>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, watch, inject } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import Loader from "../ui/Loader.vue";
 import { searchCities } from "../../api/weatherApi";
+import useWeatherCardsStore from "../../store/weatherCardsStore";
 
 export default {
   name: "SearchAutocomplete",
   components: { Loader },
   setup() {
-    const addNewCity = inject("addNewCity");
+    const weatherStore = useWeatherCardsStore();
+
     const inputValue = ref("");
     const itemsList = ref([]);
     const isOpen = ref(false);
@@ -47,6 +53,7 @@ export default {
     };
 
     const handleInput = () => {
+      isOpen.value = true;
       clearTimeout(searchTimeout.value);
       searchTimeout.value = setTimeout(() => {
         fetchCities(inputValue.value);
@@ -56,7 +63,8 @@ export default {
     };
 
     const addCity = async (result) => {
-      await addNewCity(result);
+      console.log(itemsList.value);
+      await weatherStore.addNewCity(result);
       isOpen.value = false;
       inputValue.value = "";
       itemsList.value = [];
@@ -73,7 +81,6 @@ export default {
         inputValue.value = "";
         inputRef.value.focus();
         inputRef.value.setSelectionRange(0, 0);
-        isOpen.value = true;
       }
     };
 
@@ -100,12 +107,18 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.loading-autocomplete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .autocomplete {
   position: relative;
-  max-width: 400px;
+  max-width: 500px;
   width: fit-content;
-  min-width: 500px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 16px auto;
+  z-index: 10;
 
   &-label {
     margin-bottom: 5px;
@@ -124,12 +137,18 @@ export default {
 }
 
 .autocomplete-results {
-  padding: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 10px 0;
+  top: 70px;
   margin: 0;
-  border: 1px solid #eeeeee;
-  height: 120px;
-  min-height: 1em;
-  max-height: 6em;
+  border: 1px solid #bbbbbb;
+  border-radius: 6px;
+  background-color: #fff;
+  max-height: 180px;
+  height: fit-content;
   overflow: auto;
 }
 
