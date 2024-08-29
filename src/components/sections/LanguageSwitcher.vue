@@ -55,6 +55,7 @@ export default defineComponent({
 .custom-select {
   position: relative;
   width: 150px;
+  z-index: 11;
   font-family: Arial, sans-serif;
 }
 

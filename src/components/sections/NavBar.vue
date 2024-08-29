@@ -1,45 +1,37 @@
 <template>
   <nav class="nav">
     <div class="nav__links">
-      <router-link class="nav__link" to="/">{{ $t("home") }}</router-link>
-      <router-link class="nav__link" to="/favorites">{{ $t("favorites") }}</router-link>
+      <router-link :class="{ 'nav__active-link': isActivePath('/') }" class="nav__link" to="/">{{
+        $t("home")
+      }}</router-link>
+      <router-link :class="{ 'nav__active-link': isActivePath('/favorites') }" class="nav__link" to="/favorites">{{
+        $t("favorites")
+      }}</router-link>
     </div>
     <div class="nav__tools">
-      <!-- <LanguageSwitcher /> -->
-      <button @click="toggleTheme" class="nav__themeSwitch">
-        <img
-          class="nav__themeSwitch"
-          :src="`/assets/images/${isDark ? 'moon.png' : 'sun-icon.svg'}`"
-          alt="theme-switch"
-        />
-      </button>
+      <LanguageSwitcher />
+      <ThemeSwitcher />
     </div>
   </nav>
 </template>
 
 <script>
-import { ref, onMounted, defineComponent } from "vue";
+import { defineComponent } from "vue";
 import LanguageSwitcher from "./LanguageSwitcher.vue";
+import ThemeSwitcher from "./ThemeSwitcher.vue";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
-  components: { LanguageSwitcher },
+  components: { LanguageSwitcher, ThemeSwitcher },
   setup() {
-    const isDark = ref(false);
+    const route = useRoute();
 
-    const toggleTheme = () => {
-      isDark.value = !isDark.value;
-      const theme = isDark.value ? "dark" : "light";
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem("theme", theme);
+    const isActivePath = (path) => {
+      return route.path === path;
     };
 
-    onMounted(() => {
-      isDark.value = localStorage.getItem("theme") === "dark";
-    });
-
     return {
-      isDark,
-      toggleTheme,
+      isActivePath,
     };
   },
 });
@@ -59,18 +51,15 @@ export default defineComponent({
     padding: 5px 0;
     text-decoration: none;
     margin-right: 30px;
-
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
     &:hover {
-      opacity: 0.8;
-      font-weight: 500;
+      border-bottom: 2px solid #517dcf;
     }
   }
 
-  &__themeSwitch {
-    max-width: 40px;
-    background: none !important;
-    outline: none;
-    border: none;
+  &__active-link {
+    border-bottom: 2px solid #517dcf !important;
   }
 
   &__tools {

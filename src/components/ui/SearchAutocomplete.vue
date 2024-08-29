@@ -1,6 +1,6 @@
 <template>
   <div class="autocomplete">
-    <h1 class="autocomplete-label">Type city name to search</h1>
+    <h1 class="autocomplete-label">{{ $t("typeToSearch") }}</h1>
     <input type="text" class="autocomplete__input" v-model="inputValue" @input="handleInput" ref="inputRef" />
 
     <ul
@@ -30,7 +30,6 @@ export default {
   components: { Loader },
   setup() {
     const weatherStore = useWeatherCardsStore();
-
     const inputValue = ref("");
     const itemsList = ref([]);
     const isOpen = ref(false);

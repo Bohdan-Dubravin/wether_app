@@ -11,11 +11,20 @@
       :isFavorite="isFavorite(city.city.id)"
       :period="period"
     />
-    <div v-if="data.length < 4 && !isFavoritesPage" class="card-add" @click="$emit('addNewCity')">
-      <img src="/assets/images/plus.svg" />
+    <div
+      v-if="!data.length && !isFavoritesPage"
+      :style="{ height: period === 'Day' ? '173px' : '271px' }"
+      class="card-add"
+    >
+      <Loader :visible="!data.length && !isFavoritesPage" />
     </div>
-    <div v-if="!data.length && !isFavoritesPage" class="card-add">
-      <Loader :visible="isLoading" />
+    <div
+      v-if="data.length < 4 && !isFavoritesPage"
+      class="card-add"
+      :style="{ height: period === 'Day' ? '173px' : '271px' }"
+      @click="$emit('addNewCity')"
+    >
+      <img src="/assets/images/plus.svg" />
     </div>
     <confirm-dialogue ref="reachedMaxFavLimit" :showOkButton="false" />
     <confirm-dialogue ref="confirmDialogue" showOkButton />
@@ -23,7 +32,8 @@
 </template>
 
 <script>
-import { ref, defineComponent, inject } from "vue";
+import { ref, defineComponent } from "vue";
+import Loader from "../ui/Loader.vue";
 import CityCard from "./CityCard.vue";
 import ConfirmDialogue from "../ui/ConfirmDialogue.vue";
 import useWeatherCardsStore from "../../store/weatherCardsStore";
@@ -31,7 +41,7 @@ import { storeToRefs } from "pinia";
 
 export default defineComponent({
   name: "CardsList",
-  components: { CityCard, ConfirmDialogue },
+  components: { CityCard, ConfirmDialogue, Loader },
   props: {
     data: {
       type: Array,

@@ -1,29 +1,24 @@
 import axios from "axios";
-import { useYourStore } from "../stores/yourStore"; // Import your Pinia store
-
-const api = axios.create({
-  baseURL: "https://api.example.com",
-  // Other Axios config options if needed
+import useHandleErrorStore from "../store/errorHandleStore";
+const BASE_URL = "https://api.openweathermap.org/data/2.5";
+const $axios = axios.create({
+  baseURL: BASE_URL,
 });
 
-// Intercept responses to handle errors globally
-api.interceptors.response.use(
+$axios.interceptors.response.use(
   (response) => {
-    // Return the response if successful
     return response;
   },
   async (error) => {
-    // Access your Pinia store
-    const store = useYourStore();
+    const store = useHandleErrorStore();
 
-    if (error.response && error.response.status === 401) {
-      // Call a method from the store, for example, logging out
-      await store.logout(); // Replace with your method
-    }
+    store.toggleShowAlert(true, error?.message);
 
-    // Optionally, you can throw the error again to let the calling function handle it
-    return Promise.reject(error);
+    setTimeout(() => {
+      store.toggleShowAlert(false);
+    }, 5000);
+    console.log(error);
   }
 );
 
-export default api;
+export default $axios;

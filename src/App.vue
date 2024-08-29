@@ -1,5 +1,6 @@
 <template>
   <div id="app" class="app">
+    <ErrorAlert :visible="showAlert" :text="alertText" />
     <div class="app__container">
       <NavBar />
       <router-view :key="$route.fullPath"></router-view>
@@ -9,10 +10,21 @@
 
 <script>
 import NavBar from "./components/sections/NavBar.vue";
+import ErrorAlert from "./components/ui/ErrorAlert.vue";
+import useHandleErrorStore from "./store/errorHandleStore";
+import { computed } from "vue";
 
 export default {
+  name: "App",
   components: {
     NavBar,
+    ErrorAlert,
+  },
+  setup() {
+    const alertStore = useHandleErrorStore();
+    const showAlert = computed(() => alertStore.showAlert);
+    const alertText = computed(() => alertStore.alertText);
+    return { showAlert, alertText };
   },
 };
 </script>

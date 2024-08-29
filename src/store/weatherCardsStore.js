@@ -11,10 +11,6 @@ const useWeatherCardsStore = defineStore("weatherCards", () => {
     localStorage.setItem("favorites", JSON.stringify(favoriteCities.value));
   };
 
-  // const updateStorageDefaultList = () => {
-  //   localStorage.setItem("defaultList", JSON.stringify(selectedCities.value));
-  // };
-
   const formattedCard = (card) => {
     return { ...card, list: calculateAverageTemperature(card.list) };
   };
@@ -32,7 +28,6 @@ const useWeatherCardsStore = defineStore("weatherCards", () => {
       };
     } else {
       await handleCitySelect(result);
-      // updateStorageDefaultList();
     }
     return { show: false };
   };
