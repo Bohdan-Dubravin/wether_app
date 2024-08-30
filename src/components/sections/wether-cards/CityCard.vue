@@ -28,8 +28,8 @@
           alt="weather icon"
         />
         <p class="card__paragraph">
-          Humidity: {{ city.list[0].humidity }}% <br />
-          Wind: {{ city.list[0].wind }}km/h
+          {{ $t("Humidity") }}: {{ city.list[0].humidity }}% <br />
+          {{ $t("Wind") }}: {{ city.list[0].wind }}{{ $t("km/h") }}
         </p>
       </div>
 
@@ -111,7 +111,7 @@ body {
   width: 100%;
   height: fit-content;
   border-radius: 3px;
-  background-color: #fff;
+  background-color: #ffffff;
   box-shadow: 1px 2px 10px rgba(0, 0, 0, 0.2);
   -webkit-animation: open 0.5s cubic-bezier(0.39, 0, 0.38, 1);
   border: 1px solid transparent;
@@ -129,6 +129,7 @@ body {
   }
 
   &__title {
+    color: #000;
     font-weight: 300;
     font-size: 30px;
     margin: 0 0 10px;
@@ -304,5 +305,11 @@ tr:nth-child(3) {
 
 tr:nth-child(3) {
   color: #999;
+}
+
+[data-theme="dark"] {
+  .card {
+    background-color: #e4e4e4;
+  }
 }
 </style>

@@ -1,5 +1,15 @@
 {
   "home": "Home",
   "favorites": "Favorites",
-  "typeToSearch": "Start typing city to search"
+  "typeToSearch": "Start typing city to search",
+  "Day": "Day",
+  "Week": "Week",
+  "Weather forecast for": "Weather forecast for",
+  "Humidity": "Humidity",
+  "Wind": "Wind",
+  "km/h": "km/h",
+  "Maximum number of the favorites": "Maximum number of the favorites is 5. Remove any of them to add another one.",
+  "Remove": "Remove",
+  "Are you sure": "Are you sure you want to remove this weather card?",
+  "cancel": "Cancel"
 }

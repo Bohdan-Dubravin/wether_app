@@ -11,6 +11,7 @@ import ua from "./locales/ua.json";
 
 const savedLanguage = localStorage.getItem("language") || "en";
 const i18n = createI18n({
+  legacy: false,
   locale: savedLanguage,
   fallbackLocale: "en",
   messages: {

@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { ref, computed, defineComponent } from "vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "LanguageSwitcher",
@@ -51,12 +51,17 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .custom-select {
   position: relative;
   width: 150px;
   z-index: 11;
   font-family: Arial, sans-serif;
+
+  @include onMobile {
+    font-size: 14px;
+    width: 120px;
+  }
 }
 
 .selected-option {
@@ -96,5 +101,20 @@ export default defineComponent({
 
 .arrow {
   font-size: 12px;
+}
+
+[data-theme="dark"] {
+  .selected-option {
+    background-color: #000;
+  }
+
+  .dropdown {
+    background-color: #000;
+  }
+
+  .dropdown li:hover,
+  .dropdown li.selected {
+    background-color: #595959;
+  }
 }
 </style>

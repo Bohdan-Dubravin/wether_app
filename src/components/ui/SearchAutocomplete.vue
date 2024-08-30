@@ -11,7 +11,7 @@
       <div v-if="isLoading">
         <Loader :visible="isLoading" />
       </div>
-      <p v-else-if="!itemsList?.length && !isLoading">No results</p>
+      <p v-else-if="!itemsList?.length && !isLoading" style="color: #000">No results</p>
       <li v-else v-for="(item, i) in itemsList" :key="i" class="autocomplete-result" @click="addCity(item)">
         {{ item.name }} / {{ item.sys.country }}
       </li>
@@ -126,7 +126,8 @@ export default {
     color: gray;
   }
   &__input {
-    min-width: 500px;
+    max-width: 500px;
+    width: 100%;
     outline: transparent;
     border: 1px solid #517dcf;
     padding: 10px 5px;
@@ -163,5 +164,13 @@ export default {
 .autocomplete-result:hover {
   background-color: rgba(75, 112, 192, 0.3);
   color: black;
+}
+
+[data-theme="dark"] {
+  .autocomplete__input {
+    background-color: rgb(53, 53, 53);
+    border: 1px solid #c4c4c4;
+    color: #fff;
+  }
 }
 </style>

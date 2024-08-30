@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import NavBar from "./components/sections/NavBar.vue";
+import NavBar from "./components/sections/nav-bar/NavBar.vue";
 import ErrorAlert from "./components/ui/ErrorAlert.vue";
 import useHandleErrorStore from "./store/errorHandleStore";
 import { computed } from "vue";

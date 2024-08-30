@@ -16,6 +16,7 @@
 <script>
 import { ref } from "vue";
 import ModalComponent from "./ModalComponent.vue";
+import { useI18n } from "vue-i18n";
 
 export default {
   name: "ConfirmDialogue",
@@ -26,11 +27,12 @@ export default {
       default: true,
     },
   },
-  setup(props) {
+  setup() {
+    const { t } = useI18n({ useScope: "global" });
     const title = ref(undefined);
     const message = ref(undefined);
     const submitButtonText = ref(undefined);
-    const cancelButton = ref("Go Back");
+    const cancelButton = ref(t("cancel"));
     let resolvePromise = null;
     let rejectPromise = null;
     const popupRef = ref(null);
@@ -110,8 +112,8 @@ export default {
 }
 
 .cancel-btn {
-  background-color: #d5eae7;
-  color: #35907f;
-  border: 2px solid #0ec5a4;
+  background-color: #d5ddea;
+  color: #356690;
+  border: 2px solid #0e76c5;
 }
 </style>

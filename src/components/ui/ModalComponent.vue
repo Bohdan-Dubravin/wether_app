@@ -33,7 +33,7 @@ export default defineComponent({
 });
 </script>
 
-<style scoped scss>
+<style scoped lang="scss">
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s;
@@ -64,5 +64,12 @@ export default defineComponent({
   margin-left: auto;
   margin-right: auto;
   padding: 20px;
+}
+
+[data-theme="dark"] {
+  .window {
+    background-color: #192a3b;
+    border: 1px solid #666;
+  }
 }
 </style>

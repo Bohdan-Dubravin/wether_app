@@ -12,7 +12,7 @@
         :class="{ 'period-link-active': period === link }"
         @click="togglePeriod"
       >
-        {{ link }}
+        {{ $t(link) }}
       </p>
     </div>
     <cards-list
@@ -25,26 +25,25 @@
     />
   </div>
 
-  <!-- <temperature-chart
+  <temperature-chart
     v-if="cardSelected && !favoritesPage"
     :cardSelected="cardSelected"
     :period="period"
     :weekData="selectedCities"
-  /> -->
+  />
 
   <confirm-dialogue ref="confirmDialogue" :showsubmitButtonText="true" />
   <confirm-dialogue ref="reachedMaxLimit" :showsubmitButtonText="false" />
 </template>
 
 <script>
-import { ref, reactive, defineComponent, watch, computed, onMounted } from "vue";
-import { fetchCurrentWeather, fetchByCityCountry, fetchGeolocationData } from "../api/weatherApi";
+import { ref, defineComponent, watch, computed, onMounted } from "vue";
+import { fetchGeolocationData } from "../api/weatherApi";
 import SearchAutocomplete from "../components/ui/SearchAutocomplete.vue";
-import TemperatureChart from "../components/wether-cards/TemperatureChart.vue";
-import CardsList from "../components/wether-cards/CardsList.vue";
+import CardsList from "../components/sections/wether-cards/CardsList.vue";
 import ConfirmDialogue from "../components/ui/ConfirmDialogue.vue";
-import calculateAverageTemperature from "../utils/calculateAverageTemperature";
 import useWeatherCardsStore from "../store/weatherCardsStore";
+import TemperatureChart from "../components/sections/temperature-chart/TemperatureChart.vue";
 import { storeToRefs } from "pinia";
 
 export default defineComponent({
@@ -65,15 +64,10 @@ export default defineComponent({
     const weatherStore = useWeatherCardsStore();
     const { favoriteCities, selectedCities } = storeToRefs(weatherStore);
     const autocompleteRef = ref(null);
-
     const period = ref("Day");
     const cardSelected = ref(null);
     const periodLinks = ["Day", "Week"];
     const selectedCitiesLength = computed(() => selectedCities.value.length);
-    const ipInfo = reactive({
-      city: "",
-      countryCode: "",
-    });
 
     const togglePeriod = () => {
       period.value = period.value === "Day" ? "Week" : "Day";
@@ -90,8 +84,6 @@ export default defineComponent({
     };
     const getIpInfo = async () => {
       const data = await fetchGeolocationData();
-      ipInfo.city = data.city;
-      ipInfo.countryCode = data.country_code2;
       weatherStore.addNewCity({ name: data.city, sys: { county: data.country_code2 } });
     };
 
@@ -113,7 +105,6 @@ export default defineComponent({
       favoriteCities,
       cardSelected,
       periodLinks,
-      ipInfo,
       togglePeriod,
       handleAddNewCity,
       autocompleteRef,

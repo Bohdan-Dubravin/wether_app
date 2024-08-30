@@ -18,6 +18,7 @@ $dark-theme: (
 
 body {
   @include theme($light-theme);
+  padding-bottom: 40px;
 }
 
 [data-theme="dark"] {

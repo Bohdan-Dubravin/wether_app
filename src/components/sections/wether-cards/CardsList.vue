@@ -32,12 +32,13 @@
 
 <script>
 import { ref, defineComponent } from "vue";
-import Loader from "../ui/Loader.vue";
+import Loader from "../../ui/Loader.vue";
 import CityCard from "./CityCard.vue";
-import ConfirmDialogue from "../ui/ConfirmDialogue.vue";
-import useWeatherCardsStore from "../../store/weatherCardsStore";
-import useHandleErrorStore from "../../store/errorHandleStore";
+import ConfirmDialogue from "../../ui/ConfirmDialogue.vue";
+import useWeatherCardsStore from "../../../store/weatherCardsStore";
+import useHandleErrorStore from "../../../store/errorHandleStore";
 import { storeToRefs } from "pinia";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "CardsList",
@@ -65,13 +66,14 @@ export default defineComponent({
     const showAlertStore = useHandleErrorStore();
     const weatherStore = useWeatherCardsStore();
     const { favoriteCities } = storeToRefs(weatherStore);
+    const { t } = useI18n({ useScope: "global" });
 
     const handleRemoveCity = async (city) => {
       if (!confirmDialogue.value) return;
 
       const confirm = await confirmDialogue.value.show({
-        message: "Are you sure you want to remove this weather card?",
-        submitButtonText: "Remove",
+        message: t("Are you sure"),
+        submitButtonText: t("Remove"),
       });
       if (confirm) {
         weatherStore.removeCity(city);
@@ -90,7 +92,7 @@ export default defineComponent({
       if (favoriteCities.value.some((item) => item.city.id === card.city.id) || favoriteCities.value.length < 5) {
         weatherStore.toggleFavoriteCities(card);
       } else {
-        showAlertStore.showAlert("Maximum number of the favorites is 5. Remove any of them to add another one.");
+        showAlertStore.showAlert(t("Maximum number of the favorites"));
       }
     };
 
@@ -124,8 +126,14 @@ export default defineComponent({
   border: 1px solid transparent;
   font-size: 80px;
   &:hover {
-    box-shadow: 1px 2px 10px rgb(50, 131, 131);
+    box-shadow: 1px 2px 10px rgb(48, 81, 124);
     border: 1px solid rgba(48, 64, 124, 0.9);
+  }
+}
+
+[data-theme="dark"] {
+  .card-add {
+    background-color: #acacac;
   }
 }
 

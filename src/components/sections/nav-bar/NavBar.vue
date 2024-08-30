@@ -17,8 +17,8 @@
 
 <script>
 import { defineComponent } from "vue";
-import LanguageSwitcher from "./LanguageSwitcher.vue";
-import ThemeSwitcher from "./ThemeSwitcher.vue";
+import LanguageSwitcher from "../language-switcher/LanguageSwitcher.vue";
+import ThemeSwitcher from "../theme-switcher/ThemeSwitcher.vue";
 import { useRoute } from "vue-router";
 
 export default defineComponent({
@@ -55,6 +55,11 @@ export default defineComponent({
     transition: all 0.3s;
     &:hover {
       border-bottom: 2px solid #517dcf;
+    }
+
+    @include onMobile {
+      margin-right: 10px;
+      font-size: 14px;
     }
   }
 
